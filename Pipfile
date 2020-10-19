@@ -6,6 +6,15 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+flake8 = "*"
+mypy = "*"
+django = "*"
+djangorestframework = "*"
+psycopg2-binary = "*"
+docker-compose = "*"
+pylint = "*"
+celery = "*"
+redis = "*"
 
 [requires]
 python_version = "3.8"

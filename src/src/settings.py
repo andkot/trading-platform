@@ -8,15 +8,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'd@=eu@%qx4n7%ztz#vr&97tnp@momhm@=)cgd1bx08ju^h&=by'
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = 'd@=eu@%qx4n7%ztz#vr&97tnp@momhm@=)cgd1bx08ju^h&=by'
+# SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = int(os.environ.get("DEBUG", default=0))
+DEBUG = True
+# DEBUG = int(os.environ.get("DEBUG", default=0))
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(' ')
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(' ')
 
 # Application definition
 
@@ -30,6 +30,9 @@ INSTALLED_APPS = [
 
     # rest
     'rest_framework',
+
+    # project apps
+    'offers',
 ]
 
 MIDDLEWARE = [
@@ -71,7 +74,7 @@ DATABASES = {
         'NAME': 'trading_platform_db',
         'USER': 'trading_platform_user',  # Not used with sqlite3.
         'PASSWORD': 'password',  # Not used with sqlite3.
-        'HOST': 'db',  # (docker - db)
+        'HOST': 'localhost',  # (docker - db)
         'PORT': '5432',  # Set to empty string
     }
 }
@@ -111,3 +114,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# rest
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
+    )
+}
