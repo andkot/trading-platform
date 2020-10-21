@@ -1,6 +1,15 @@
-from rest_framework.serializers import ModelSerializer, HyperlinkedModelSerializer
-from ..models import *
+from rest_framework.serializers import HyperlinkedModelSerializer
+
 from django.contrib.auth.models import User
+
+from offers.models import (
+    Currency,
+    Item,
+    WatchList,
+    Offer,
+    Trade,
+    Inventory,
+)
 
 
 class CurrencySerializer(HyperlinkedModelSerializer):

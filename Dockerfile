@@ -1,18 +1,24 @@
 # pull official base image
-FROM python:3.8.3-slim-buster
-
-# set work directory
-WORKDIR /my_project
+FROM python:3.8-slim
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
-RUN pip install --upgrade pip
+# set work directory
+WORKDIR /app
 
-COPY ./requirements.txt /my_project/requirements.txt
-RUN pip install -r requirements.txt
+COPY . /app/
 
-# copy project
-COPY . /my_project
+# copy and run pipenv
+COPY Pipfile* /app/
+RUN pip install pipenv \
+    && pipenv install --deploy --system --ignore-pipfile
+
+# copy entrypoint.sh
+COPY entrypoint.sh /app/
+# make entrypoint.sh executable
+RUN chmod +x entrypoint.sh
+
+# run entrypoint.sh
+CMD ./entrypoint.sh

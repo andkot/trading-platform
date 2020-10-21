@@ -8,15 +8,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'd@=eu@%qx4n7%ztz#vr&97tnp@momhm@=)cgd1bx08ju^h&=by'
-# SECRET_KEY = os.environ.get("SECRET_KEY")
+# SECRET_KEY = 'd@=eu@%qx4n7%ztz#vr&97tnp@momhm@=)cgd1bx08ju^h&=by'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = int(os.environ.get("DEBUG", default=0))
+# DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(' ')
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(' ')
 
 # Application definition
 
@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'src.urls'
+ROOT_URLCONF = 'trading_platform.urls'
 
 TEMPLATES = [
     {
@@ -63,7 +63,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'src.wsgi.application'
+WSGI_APPLICATION = 'trading_platform.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -71,11 +71,11 @@ WSGI_APPLICATION = 'src.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'trading_platform_db',
-        'USER': 'trading_platform_user',  # Not used with sqlite3.
-        'PASSWORD': 'password',  # Not used with sqlite3.
-        'HOST': 'localhost',  # (docker - db)
-        'PORT': '5432',  # Set to empty string
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),  # Not used with sqlite3.
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),  # Not used with sqlite3.
+        'HOST': os.environ.get('POSTGRES_HOST', 'postgres'),  # (docker - db)
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),  # Set to empty string
     }
 }
 
