@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 
 from enum import Enum
@@ -14,7 +15,7 @@ class BuyOrSell(Enum):
         return tuple((i.name, i.value) for i in cls)
 
 
-User = settings.AUTH_USER_MODEL
+# User = settings.AUTH_USER_MODEL
 
 
 class Currency(models.Model):
