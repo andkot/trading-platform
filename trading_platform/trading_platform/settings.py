@@ -115,10 +115,20 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# rest
+# REST Configuration Options
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication'
     )
 }
+
+# Celery Configuration Options
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+# CELERY_ACCEPT_CONTENT = os.environ.get('CELERY_ACCEPT_CONTENT', 'application/json')
+CELERY_RESULT_SERIALIZER = os.environ.get('CELERY_RESULT_SERIALIZER', 'json')
+CELERY_TASK_SERIALIZER = os.environ.get('CELERY_TASK_SERIALIZER', 'json')
+CELERY_STORE_ERRORS_EVEN_IF_IGNORED = os.environ.get('CELERY_STORE_ERRORS_EVEN_IF_IGNORED', True)
+
+

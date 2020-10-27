@@ -6,8 +6,8 @@ from enum import Enum
 
 
 class BuyOrSell(Enum):
-    BUY = 'buy'
-    SELL = 'sell'
+    BUY = 'BUY'
+    SELL = 'SELL'
 
     @classmethod
     def choices(cls):
@@ -35,6 +35,7 @@ class WatchList(models.Model):
 
 
 class Offer(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     number = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.1)])
@@ -47,6 +48,7 @@ class Trade(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller')
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     number = models.PositiveIntegerField(null=False, validators=[MinValueValidator(1)])
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.1)])
 
 
 class Inventory(models.Model):

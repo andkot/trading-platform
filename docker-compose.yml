@@ -1,19 +1,39 @@
 version: '3.7'
+
 services:
   web:
     # Where find Dockerfile
-    build: .
+    build: ./trading_platform
     volumes:
-      - ./trading_platform/:/app/trading_platform
+      - ./trading_platform/:/app/
     ports:
       - 8000:8000
     env_file:
-      - ./.env.dev
+      - ./trading_platform/.env.dev
     depends_on:
       - db
+      - redis
+
+  celery:
+    build: ./trading_platform
+    command: celery -A trading_platform worker -B -l info
+    env_file:
+      - ./trading_platform/.env.dev
+    depends_on:
+      - redis
+    volumes:
+      - ./trading_platform/:/app
+
   db:
     image: postgres:latest
     volumes:
       - ./postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env.dev
+      - ./trading_platform/.env.dev
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data

@@ -17,6 +17,7 @@ def test_currency_model():
 
     # Create Currency model instance
     currency = Currency(code='Code 1', name='USD')
+    # assert currency.save() == True
     currency1 = Currency(code='Code 1', name='USD')
 
     assert currency.code == 'Code 1'
