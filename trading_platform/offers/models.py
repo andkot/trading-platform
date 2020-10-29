@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 
@@ -15,17 +14,14 @@ class BuyOrSell(Enum):
         return tuple((i.name, i.value) for i in cls)
 
 
-# User = settings.AUTH_USER_MODEL
-
-
 class Currency(models.Model):
     code = models.CharField(max_length=8, unique=True)
     name = models.CharField(max_length=128, unique=True)
 
 
 class Item(models.Model):
-    name = models.CharField(max_length=50)
-    key = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
+    key = models.CharField(max_length=50, unique=True)
     currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.1)])
 

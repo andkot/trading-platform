@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
 
-from offers.api.permissions import IsOwnerOrReadOnlyUser
+from offers.api.permissions import (
+    IsOwnerOrReadOnlyUser,
+    IsNoSuperUser,
+)
 from offers.api.serializers import (
     CurrencySerializer,
     ItemSerializer,
@@ -30,6 +33,7 @@ from django.contrib.auth.models import User
 class CurrencyView(ModelViewSet):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
+    permission_classes = (IsNoSuperUser,)
 
 
 class ItemView(ModelViewSet):
@@ -76,14 +80,3 @@ class UserView(ModelViewSet):
         if self.action == 'create':
             return CreateUserSerializer
         return super().get_serializer_class()
-
-# from ..asynchrony.test_task import hello_world
-#
-#
-# class AsyncView(ModelViewSet):
-#     queryset = Currency.objects.all()
-#     serializer_class = CurrencySerializer
-#
-#     @action(detail=False, methods=['GET'])
-#     def test(self, request):
-#         return Response({'test': hello_world()})
