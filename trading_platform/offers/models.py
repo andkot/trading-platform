@@ -2,16 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 
-from enum import Enum
-
-
-class BuyOrSell(Enum):
-    BUY = 'BUY'
-    SELL = 'SELL'
-
-    @classmethod
-    def choices(cls):
-        return tuple((i.name, i.value) for i in cls)
+from offers.enums import BuyOrSell
 
 
 class Currency(models.Model):

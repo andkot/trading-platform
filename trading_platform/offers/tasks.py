@@ -2,22 +2,21 @@ from trading_platform.celery import app
 
 from django.db.models import Min
 
-from offers.models import (
-    Offer,
-    Trade,
-)
+from offers.models import Offer, Trade, BuyOrSell
+
+
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(10.0, check_offers.s('asas'), name='add every 10 sec')
 
 
 @app.task
 def check_offers():
-    # get all offers
-    offers = Offer.objects.all()
-
     # all offerings to sell
-    offerings_to_sell = offers.filter(buy_or_sell='SELL')
+    offerings_to_sell = Offer.objects.filter(buy_or_sell=BuyOrSell.SELL.value)
     result = []
     # all offerings to buy
-    offerings_to_buy = offers.filter(buy_or_sell='BUY')
+    offerings_to_buy = Offer.objects.filter(buy_or_sell=BuyOrSell.BUY.value)
 
     for of_to_buy in offerings_to_buy:
         if of_to_buy.is_active:

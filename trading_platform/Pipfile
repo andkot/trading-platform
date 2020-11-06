@@ -17,6 +17,8 @@ celery = "*"
 redis = "*"
 pytest = "*"
 pytest-django = "*"
+djangorestframework-jwt = "*"
+django-celery-beat = "*"
 
 [requires]
 python_version = "3.8"
