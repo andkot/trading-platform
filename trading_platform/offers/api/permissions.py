@@ -15,11 +15,14 @@ class ReadOnly(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
 
 
-class IsOwnerOrReadOnlyUser(permissions.BasePermission):
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated or (request.method == 'GET')
+
     def has_object_permission(self, request, view, obj):
         if (request.method in permissions.SAFE_METHODS) and (request.method not in 'POST'):
             return True
-        return obj.pk == request.user.pk
+        return obj.owner.pk == request.user.pk
 
 
 class IsSuperUserOrReadOnly(permissions.BasePermission):
@@ -27,20 +30,30 @@ class IsSuperUserOrReadOnly(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS or request.user.is_superuser
 
 
-class OnlySuperUser(permissions.BasePermission):
+class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_superuser
 
 
 class IsOwner(permissions.BasePermission):
-    def has_permission(self, request, view):
-        user = User.objects.get(pk=view.kwargs['pk'])
-        return request.user == user
+    def has_object_permission(self, request, view, obj):
+        return obj.owner.pk == request.user.pk
 
-class IsOwnerOfTrade(permissions.BasePermission):
+
+class IsOwnerToCreate(permissions.BasePermission):
     def has_permission(self, request, view):
-        v = view
-        user = User.objects.get(pk=view.kwargs['pk'])
-        return request.user == user
-        # user = User.objects.filter() get(pk=view.kwargs['pk'])
-        # return request.user == user
+        if view.action in ('create', 'list'):
+            return True
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return obj.owner.pk == request.user.pk
+
+
+class IsOwnerOrSuperUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            user = User.objects.get(pk=view.kwargs['pk'])
+        except:
+            return request.user.is_superuser
+        return (request.user == user) or request.user.is_superuser

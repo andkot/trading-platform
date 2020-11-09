@@ -6,20 +6,15 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     RetrieveModelMixin,
 )
-from rest_framework.decorators import action, permission_classes
+from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework import permissions, authentication
 from rest_framework import status
-
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from offers.api.permissions import (
     ReadOnly,
-    IsOwnerOrReadOnlyUser,
+    IsOwnerOrReadOnly,
     IsSuperUserOrReadOnly,
-    OnlySuperUser,
-    IsOwner,
-    IsOwnerOfTrade,
+    IsSuperUser,
 )
 from offers.api.serializers import (
     CurrencySerializer,
@@ -30,6 +25,10 @@ from offers.api.serializers import (
     InventorySerializer,
     CreateUserSerializer,
     UserSerializer,
+)
+from offers.api.filters import (
+    IsOwnerFilter,
+    IsBuyerOrSeller,
 )
 from offers.models import (
     Currency,
@@ -46,56 +45,58 @@ from django.contrib.auth.models import User
 class CurrencyView(ModelViewSet):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
-    permission_classes = (ReadOnly,)
+    permission_classes = (IsSuperUserOrReadOnly,)
 
 
 class ItemView(ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
-    permission_classes = (ReadOnly,)
+    permission_classes = (IsSuperUserOrReadOnly,)
 
 
 class WatchListView(ModelViewSet):
-    # authentication_classes = (JSONWebTokenAuthentication,)
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializer
-    permission_classes = (OnlySuperUser,)
-
-    @action(detail=False, methods=['GET'], url_path='user-list/(?P<pk>[^/.]+)', )
-    def user_list(self, request, pk):
-        try:
-            owner = self.queryset.filter(owner=User.objects.get(pk=pk))
-            serializer = self.serializer_class(owner, many=True, context={'request': request})
-            return Response(serializer.data)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def get_permissions(self):
-        if self.action == 'user_list':
-            return (IsOwner(),)
-        return (OnlySuperUser(),)
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_backends = (IsOwnerFilter,)
 
 
 class OfferView(ModelViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnlyUser)
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def create(self, request, *args, **kwargs):
+        target = request.data['buy_or_sell']
+        if target == 'SELL':
+            user_pk = request.user.pk
+            item_pk = request.data['item']
+            target_number = request.data['number']
+            try:
+                item = Inventory.objects.get(owner__id=user_pk, item_id=item_pk)
+                number = item.number
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            if number < int(target_number):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return super(OfferView, self).create(request, *args, **kwargs)
+
+        return super(OfferView, self).create(request, *args, **kwargs)
 
 
 class TradeView(ModelViewSet):
     queryset = Trade.objects.all()
     serializer_class = TradeSerializer
-    permission_classes = (OnlySuperUser,)
-
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            return (IsOwnerOfTrade(),)
-        return (OnlySuperUser(),)
+    permission_classes = (ReadOnly,)
+    filter_backends = (IsBuyerOrSeller,)
 
 
 class InventoryView(ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
+    permission_classes = (ReadOnly,)
+    filter_backends = (IsOwnerFilter,)
 
 
 class UsersListView(
@@ -107,14 +108,7 @@ class UsersListView(
 ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-
-# class DetailsUserView(
-#
-#     GenericViewSet,
-# ):
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+    permission_classes = (ReadOnly,)
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):

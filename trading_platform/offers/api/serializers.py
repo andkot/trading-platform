@@ -1,3 +1,4 @@
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.serializers import ModelSerializer
 from rest_framework.response import Response
 from rest_framework import serializers
@@ -28,11 +29,18 @@ class ItemSerializer(ModelSerializer):
 
 
 class WatchListSerializer(ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.pk')
+    owner = serializers.PrimaryKeyRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
 
     class Meta:
         model = WatchList
         fields = '__all__'
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=WatchList.objects.all(),
+                fields=['owner', 'item'],
+            )
+        ]
 
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
@@ -40,7 +48,7 @@ class WatchListSerializer(ModelSerializer):
 
 
 class OfferSerializer(ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.pk')
+    owner = serializers.PrimaryKeyRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
 
     class Meta:
         model = Offer
@@ -71,7 +79,6 @@ class CreateUserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password', 'repeat_password')
-        # extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         repeat_password = validated_data.pop('repeat_password')
@@ -90,8 +97,3 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'is_superuser', 'pk']
-
-# class UserLoginSerializer(ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('username', 'password')
