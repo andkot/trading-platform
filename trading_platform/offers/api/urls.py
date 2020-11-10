@@ -6,7 +6,6 @@ from offers.api.views import (
     TradeView,
     InventoryView,
     UsersListView,
-    # DetailsUserView,
     CreateUserView,
 )
 

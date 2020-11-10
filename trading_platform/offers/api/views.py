@@ -79,8 +79,6 @@ class OfferView(ModelViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             if number < int(target_number):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return super(OfferView, self).create(request, *args, **kwargs)
 
         return super(OfferView, self).create(request, *args, **kwargs)
 

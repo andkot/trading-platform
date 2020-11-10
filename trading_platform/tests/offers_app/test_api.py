@@ -70,9 +70,13 @@ def test_currency_api(client, get_urls, create_model_instance):
     client.force_authenticate(user)
 
     # list
-    data = [{'id': obj.pk,
-             'code': obj.code,
-             'name': obj.name}]
+    data = [
+        {
+            'id': obj.pk,
+            'code': obj.code,
+            'name': obj.name
+        }
+    ]
     url = get_urls['currencies']
     get_response = client.get(url)
     post_response = client.post(url)
