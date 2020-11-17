@@ -7,13 +7,12 @@ from offers.api.views import (
     InventoryView,
     UsersListView,
     CreateUserView,
+    ActivateUserView,
 )
 
 from rest_framework import routers
 
-from django.urls import path, include
-
-from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
 from django.conf.urls import url
 
 app_name = 'offers'
@@ -28,8 +27,10 @@ router.register(r'trades', TradeView, basename='trades')
 router.register(r'inventories', InventoryView, basename='inventories')
 router.register(r'users', UsersListView, basename='users')
 router.register(r'create-user', CreateUserView, basename='create-user')
+router.register(r'activate', ActivateUserView, basename='activate')
 
 urlpatterns = router.urls
 
-urlpatterns += url(r'^api-token-auth/', obtain_jwt_token, name='token_auth'),
-urlpatterns += url(r'^api-token-refresh/', refresh_jwt_token, name='token_refresh'),
+urlpatterns += url(r'^api-token-auth/', obtain_jwt_token, name='token-auth'),
+urlpatterns += url(r'^api-token-refresh/', refresh_jwt_token, name='token-refresh'),
+urlpatterns += url(r'^api-token-verify/', verify_jwt_token, name='token-verify'),

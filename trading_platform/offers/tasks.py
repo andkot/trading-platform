@@ -1,8 +1,11 @@
 from trading_platform.celery import app
 
 from django.db.models import Min
+from django.core.mail import send_mail
 
 from offers.models import Offer, Trade, BuyOrSell, Inventory
+
+from time import sleep
 
 
 @app.task
@@ -66,3 +69,19 @@ def check_offers():
                             item=of_to_buy.item,
                             number=buy.number,
                         )
+
+
+@app.task
+def send_confirm_email(
+        subject,
+        message,
+        from_email,
+        recipient_list
+):
+    send_mail(
+        subject,
+        message,
+        from_email,
+        [recipient_list],
+    )
+

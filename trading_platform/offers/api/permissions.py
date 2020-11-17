@@ -57,3 +57,11 @@ class IsOwnerOrSuperUser(permissions.BasePermission):
         except:
             return request.user.is_superuser
         return (request.user == user) or request.user.is_superuser
+
+
+class IsOwnerOrReadOnlyUserView(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (request.user.is_authenticated) or (request.method in ['GET', ])
+
+    def has_object_permission(self, request, view, obj):
+        return (obj.pk == request.user.pk) or (request.method in ['GET', ])

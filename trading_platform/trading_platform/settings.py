@@ -19,6 +19,7 @@ DEBUG = int(os.environ.get("DEBUG", default=0))
 
 # ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(' ')
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -39,10 +40,15 @@ INSTALLED_APPS = [
     # project apps
     'offers',
 
+    # celery
     'django_celery_beat',
+
+    # cors
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -122,7 +128,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
 # REST Configuration Options
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -133,6 +138,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework.renderers.JSONRenderer',
+    # ),
+    # 'DEFAULT_PARSER_CLASSES': (
+    #     'rest_framework.parsers.JSONParser',
+    #     'rest_framework.parsers.FormParser',
+    #     'rest_framework.parsers.MultiPartParser',
+    # )
 }
 
 # JWT
@@ -178,3 +191,11 @@ CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6
 CELERY_RESULT_SERIALIZER = os.environ.get('CELERY_RESULT_SERIALIZER', 'json')
 CELERY_TASK_SERIALIZER = os.environ.get('CELERY_TASK_SERIALIZER', 'json')
 CELERY_STORE_ERRORS_EVEN_IF_IGNORED = os.environ.get('CELERY_STORE_ERRORS_EVEN_IF_IGNORED', True)
+
+# Emails sending
+EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'andrew.m.kot@gmail.com'
+EMAIL_HOST_PASSWORD = 'iarrogeprxzioawh'

@@ -9,12 +9,13 @@ from rest_framework.mixins import (
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 
 from offers.api.permissions import (
     ReadOnly,
     IsOwnerOrReadOnly,
     IsSuperUserOrReadOnly,
-    IsSuperUser,
+    IsOwnerOrReadOnlyUserView,
 )
 from offers.api.serializers import (
     CurrencySerializer,
@@ -38,8 +39,12 @@ from offers.models import (
     Trade,
     Inventory,
 )
+from offers.tasks import send_confirm_email
+from offers.api.tokens import make_token, decode_token
 
 from django.contrib.auth.models import User
+
+SENDER = 'from@example.com'
 
 
 class CurrencyView(ModelViewSet):
@@ -106,7 +111,7 @@ class UsersListView(
 ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (ReadOnly,)
+    permission_classes = (IsOwnerOrReadOnlyUserView,)
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):
@@ -116,3 +121,45 @@ class CreateUserView(CreateModelMixin, GenericViewSet):
 
     def get_permissions(self):
         return (permissions.AllowAny(),)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        created_object = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        # send the confirmation
+        token = make_token(created_object)
+        send_confirm_email(
+            'CONFIRMATION',
+            str(token),
+            SENDER,
+            [created_object.email]
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        created_object = serializer.save()
+        return created_object
+
+
+class ActivateUserView(GenericViewSet):
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,)
+
+    @action(methods=['GET', ], detail=False, url_path='(?P<token>.*)')
+    def activate(self, request, *args, **kwargs):
+        token = kwargs['token']
+        payload = decode_token(token)
+        user = User.objects.get(id=payload['user_id'])
+        user.is_active = True
+        email = user.email
+        # send message
+        send_confirm_email(
+            'YOUR ACCOUNT HAS ACTIVATED',
+            str(token),
+            SENDER,
+            [email]
+        )
+        return Response(status=status.HTTP_200_OK, data={'message': 'You account has activated!'})

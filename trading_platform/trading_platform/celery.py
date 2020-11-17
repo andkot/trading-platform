@@ -11,6 +11,8 @@ app.conf.beat_schedule = {
         'task': 'offers.tasks.check_offers',
         'schedule': 10.0,
     },
+    'send_email': {
+        'task': 'offers.tasks.send_confirm_email',
+        'schedule': 10.0,
+    }
 }
-
-

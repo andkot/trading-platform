@@ -2,6 +2,8 @@ from tests.fixtures import (
     create_model_instance,
     get_check_offers_task,
     get_inventory_instance,
+    get_send_email_task,
+    get_django_mail,
 )
 
 import pytest
@@ -78,3 +80,14 @@ def test_offers(
     get_check_offers_task()
     inventory_sell = get_inventory_instance(inventory_sell.pk)
     assert inventory_sell.number == 1100
+
+
+def test_send(get_django_mail):
+    get_django_mail.send_mail('subject', 'body.', 'from@example.com', ['to@example.com'])
+    assert len(get_django_mail.outbox) == 1
+
+
+def test_send_again(get_send_email_task, get_django_mail):
+    get_send_email_task('subject', 'body.', 'from@example.com', ['to@example.com'])
+    out = get_django_mail.outbox
+    assert len(get_django_mail.outbox) == 1

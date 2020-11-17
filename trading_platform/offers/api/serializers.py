@@ -73,12 +73,14 @@ class InventorySerializer(ModelSerializer):
 
 class CreateUserSerializer(ModelSerializer):
     username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
     repeat_password = serializers.CharField(write_only=True)
+    is_active = serializers.HiddenField(default=False)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'repeat_password')
+        fields = ('username', 'email', 'password', 'repeat_password', 'is_active')
 
     def create(self, validated_data):
         repeat_password = validated_data.pop('repeat_password')
@@ -97,3 +99,15 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'is_superuser', 'pk']
+
+
+class UpdateUserSerializer(ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'password',)
+
+    def update(self, instance, validated_data):
+        pass
+
