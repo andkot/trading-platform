@@ -1,25 +1,39 @@
 version: '3.7'
+
 services:
-  trading-platform:
+  web:
     # Where find Dockerfile
-    build: .
-    command: python src/manage.py runserver 0.0.0.0:8000
+    build: ./trading_platform
     volumes:
-      - ./my_project #
+      - ./trading_platform/:/app/
     ports:
       - 8000:8000
     env_file:
-      - ./.env.dev
+      - ./trading_platform/.env.dev
     depends_on:
       - db
-  db:
-    image: postgres:13.0
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=trading_platform_user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=trading_platform_db
+      - redis
 
-volumes:
-  postgres_data:
+  celery:
+    build: ./trading_platform
+    command: celery -A trading_platform worker -B -l info
+    env_file:
+      - ./trading_platform/.env.dev
+    depends_on:
+      - redis
+    volumes:
+      - ./trading_platform/:/app
+
+  db:
+    image: postgres:latest
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./trading_platform/.env.dev
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data
