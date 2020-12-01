@@ -130,14 +130,15 @@ STATIC_URL = '/static/'
 
 # REST Configuration Options
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'offers.api.permissions.IsAuthenticatedOrAPIRoot',
-    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+
     # 'DEFAULT_RENDERER_CLASSES': (
     #     'rest_framework.renderers.JSONRenderer',
     # ),
@@ -147,6 +148,12 @@ REST_FRAMEWORK = {
     #     'rest_framework.parsers.MultiPartParser',
     # )
 }
+
+# backend
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by custom User model, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+)
 
 # JWT
 JWT_AUTH = {
@@ -193,7 +200,7 @@ CELERY_TASK_SERIALIZER = os.environ.get('CELERY_TASK_SERIALIZER', 'json')
 CELERY_STORE_ERRORS_EVEN_IF_IGNORED = os.environ.get('CELERY_STORE_ERRORS_EVEN_IF_IGNORED', True)
 
 # Emails sending
-EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587

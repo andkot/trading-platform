@@ -5,6 +5,8 @@ from django.core.validators import MinValueValidator
 from offers.enums import BuyOrSell
 
 
+
+
 class Currency(models.Model):
     code = models.CharField(max_length=8, unique=True)
     name = models.CharField(max_length=128, unique=True)

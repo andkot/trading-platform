@@ -26,6 +26,7 @@ from offers.api.serializers import (
     InventorySerializer,
     CreateUserSerializer,
     UserSerializer,
+    UpdateUserSerializer,
 )
 from offers.api.filters import (
     IsOwnerFilter,
@@ -39,12 +40,15 @@ from offers.models import (
     Trade,
     Inventory,
 )
-from offers.tasks import send_confirm_email
+from offers.tasks import send_confirm_email, task
 from offers.api.tokens import make_token, decode_token
 
 from django.contrib.auth.models import User
 
 SENDER = 'from@example.com'
+
+
+# SENDER = 'andrew.m.kot@gmail.com'
 
 
 class CurrencyView(ModelViewSet):
@@ -104,7 +108,7 @@ class InventoryView(ModelViewSet):
 
 class UsersListView(
     ListModelMixin,
-    UpdateModelMixin,
+    # UpdateModelMixin,
     DestroyModelMixin,
     RetrieveModelMixin,
     GenericViewSet
@@ -112,6 +116,33 @@ class UsersListView(
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsOwnerOrReadOnlyUserView,)
+
+
+class UpdateUserView(
+    GenericViewSet,
+    UpdateModelMixin,
+):
+    queryset = User.objects.all()
+    serializer_class = UpdateUserSerializer
+    permission_classes = (IsOwnerOrReadOnlyUserView,)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+        data = {k: v for k, v in data.items() if v != ''}
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    # def partial_update(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):
@@ -130,12 +161,14 @@ class CreateUserView(CreateModelMixin, GenericViewSet):
 
         # send the confirmation
         token = make_token(created_object)
-        send_confirm_email(
+        send_confirm_email.delay(
             'CONFIRMATION',
             str(token),
             SENDER,
-            [created_object.email]
+            created_object.email
         )
+
+        # res = task.delay('hello!!!')
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -154,12 +187,13 @@ class ActivateUserView(GenericViewSet):
         payload = decode_token(token)
         user = User.objects.get(id=payload['user_id'])
         user.is_active = True
+        user.save()
         email = user.email
         # send message
-        send_confirm_email(
+        send_confirm_email.delay(
             'YOUR ACCOUNT HAS ACTIVATED',
-            str(token),
+            'Congratulations!',
             SENDER,
-            [email]
+            email
         )
         return Response(status=status.HTTP_200_OK, data={'message': 'You account has activated!'})

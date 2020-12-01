@@ -84,12 +84,13 @@ class CreateUserSerializer(ModelSerializer):
 
     def create(self, validated_data):
         repeat_password = validated_data.pop('repeat_password')
-        password = validated_data.pop('password')
+        password = validated_data['password']
         if repeat_password != password:
             raise serializers.ValidationError("Passwords do not match")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
+        try:
+            user = User.objects.create_user(**validated_data)
+        except:
+            raise serializers.ValidationError("Error of creating")
         return user
 
 
@@ -103,11 +104,15 @@ class UserSerializer(ModelSerializer):
 
 class UpdateUserSerializer(ModelSerializer):
     password = serializers.CharField(write_only=True)
+    email = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'password',)
+        fields = ('username', 'email', 'password',)
+
 
     def update(self, instance, validated_data):
-        pass
-
+        password = validated_data.pop('password', None)
+        if not instance.check_password(password):
+            raise serializers.ValidationError("Invalid password!")
+        return instance

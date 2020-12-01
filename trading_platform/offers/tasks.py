@@ -5,7 +5,16 @@ from django.core.mail import send_mail
 
 from offers.models import Offer, Trade, BuyOrSell, Inventory
 
-from time import sleep
+
+# app.register_task(task)
+# from time import sleep
+
+
+# @app.on_after_finalize.connect
+# def setup_periodic_tasks(sender, **kwargs):
+#     # arg = [kwargs,]
+#     # sender.add_periodic_task(10, send_confirm_email.s(kwargs))
+#     # sender.add_periodic_task(10, task.s('kwargs', arg))
 
 
 @app.task
@@ -84,4 +93,14 @@ def send_confirm_email(
         from_email,
         [recipient_list],
     )
+
+    print(subject,
+        message,
+        from_email,
+        recipient_list)
+
+
+@app.task
+def task(arg):
+    print(arg, 'task!!!!!!!!!!!')
 

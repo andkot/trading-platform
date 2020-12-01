@@ -8,6 +8,7 @@ from offers.api.views import (
     UsersListView,
     CreateUserView,
     ActivateUserView,
+    UpdateUserView,
 )
 
 from rest_framework import routers
@@ -28,9 +29,10 @@ router.register(r'inventories', InventoryView, basename='inventories')
 router.register(r'users', UsersListView, basename='users')
 router.register(r'create-user', CreateUserView, basename='create-user')
 router.register(r'activate', ActivateUserView, basename='activate')
+router.register(r'update', UpdateUserView, basename='update')
 
 urlpatterns = router.urls
 
-urlpatterns += url(r'^api-token-auth/', obtain_jwt_token, name='token-auth'),
-urlpatterns += url(r'^api-token-refresh/', refresh_jwt_token, name='token-refresh'),
-urlpatterns += url(r'^api-token-verify/', verify_jwt_token, name='token-verify'),
+# urlpatterns += url(r'^api-token-auth/', obtain_jwt_token, name='token-auth'),
+# urlpatterns += url(r'^api-token-refresh/', refresh_jwt_token, name='token-refresh'),
+# urlpatterns += url(r'^api-token-verify/', verify_jwt_token, name='token-verify'),

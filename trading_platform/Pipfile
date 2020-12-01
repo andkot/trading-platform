@@ -20,6 +20,7 @@ pytest-django = "*"
 djangorestframework-jwt = "*"
 django-celery-beat = "*"
 django-cors-headers = "*"
+django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.8"
